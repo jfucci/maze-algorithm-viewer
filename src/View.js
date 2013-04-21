@@ -36,7 +36,7 @@
 
 	maze.View.prototype._mouseClick = function(event) {
 		var mousePos = [this.getMouseXCoord(event), this.getMouseYCoord(event)],
-			mousedCell = [Math.floor(this.getMouseXCoord(event)), Math.floor(this.getMouseYCoord(event))],
+			mousedCell = mousePos.map(Math.floor),
 			x = Math.round(mousePos[0], 0),
 			y = Math.round(mousePos[1], 0);
 
@@ -69,7 +69,7 @@
 		} else if(!this.model.end) {
 			this.update();
 			this.drawSquare(mousePos, "red");
-		}	
+		}
 	};
 
 	maze.View.prototype.getMouseXCoord = function(event) {

@@ -6,8 +6,8 @@
 		this.getGridWidth  = _.constant(setup.gridWidth);
 		this.getGridHeight = _.constant(setup.gridHeight);
 		this.grid          = {};
-		this.start         = [0, 0]; //temp
-		this.end           = [9, 9]; //temp
+		this.start         = [0, 0];
+		this.end           = [this.getGridWidth()-1, this.getGridHeight()-1];
 		this.pathData      = {"step": null, "currentNode": null, "visited": null};
 		var coordinates    = _.product([_.range(this.getGridWidth()), _.range(this.getGridHeight())]);
 
@@ -17,10 +17,11 @@
 	};
 
 	maze.Model.prototype.clearGrid = function() {
-		_.each(this.grid, function(cell){  
+		_.each(this.grid, function(cell){
 			cell.walls = maze.createDirectionFlags();
 		}, this);
 	};
+
 	maze.Model.prototype.generate = function() {
 		_.each(this.grid, function(cell) {
 			cell.walls = maze.createDirectionFlags(true); //make sure all cells have all walls up
@@ -159,16 +160,11 @@
 			distances[cell.getLocation()] = Infinity;
 		}, this);
 
-		_.each(this.grid, function(cell) {
-			this.paths[cell.getLocation()] = currentNode.getLocation();
-		}, this);
-
 		distances[currentNode.getLocation()] = 0;
 
 		//this.getUnWalledNeighbors(currentNode) will return null if there is no path between the start and stop
 		while(!_.isEmpty(unvisited)) {
-			//stop condition
-			if(_.arrayEquals(currentNode.getLocation(), this.end) || currStep === step) {
+			if(_.arrayEquals(currentNode.getLocation(), this.end) || currStep === step) { //stop condition
 				this.traceShortestPath(currentNode.getLocation());
 				var visited = {};
 				_.each(this.grid, function(cell, location) {
@@ -203,52 +199,127 @@
 		}
 	};
 
+	//functions used for an A* search {{{
+
 	maze.Model.prototype.AStar = function(step) {
 		this.paths   = {};
-		var set      = {},
-			f_score  = {},	//f_score = g_score + h_score, but g_score is a constant. To find the h_score, this algorithm uses the "Manhattan method"
-			current  = this.start[0] + "," + this.start[1],
-			target   = this.end,
-			currStep = 0; 
+		//openList and f_score start with undefined because the binary heap needs the index 
+		//to start with 1 to simplify math; see http://www.policyalmanac.org/games/binaryHeaps.htm
+        var openList = [undefined],
+            closedList = [],
+            f_score  = [undefined],
+            current  = this.start,
+            target   = this.end,
+            currStep = 0;
 
-		set[current] = "open";
-		f_score[current] = Math.abs(current[0] - target[0]) + Math.abs(current[1] - target[1]);
+        openList.push(current);
+        f_score.push(this.getFScore(current));
 
-		while(_.filter(set, function(state) { return state === "open"; }).length > 0) {
-			//stop condition
-			if(current === target[0] + "," + target[1] || currStep === step) {
-				current = [Number(current.split(",")[0]), Number(current.split(",")[1])];
-				this.traceShortestPath(current);
-				var visited = {};
-				_.each(set, function(state, cell) {
-					if(state === "closed") {
-						visited[cell] = this.grid[[Number(cell.split(",")[0]), Number(cell.split(",")[1])]];
-					}
-				}, this);
-				this.pathData = {"step": currStep, "currentNode": current, "visited": visited};
+        while(openList.length > 0) {
+            if(_.arrayEquals(current, target) || currStep === step) { //stop condition
+                this.traceShortestPath(current);
+                var visited = closedList.map(function(cell){ return this.grid[cell]; }, this);
+                this.pathData = {"step": currStep, "currentNode": current, "visited": visited};
+                return;
+            }
+
+            current = this.removeFromOpen(openList, f_score);
+            closedList.push(current);
+
+            var neighbors = this.getUnWalledNeighbors(this.grid[current]);
+            _.each(neighbors, function(neighbor) {
+                neighbor = neighbor.getLocation();
+                if(!this.contains(openList, neighbor) && !this.contains(closedList, neighbor)) {
+                    this.paths[neighbor] = current;
+					this.addToOpen(openList, f_score, neighbor);
+                }
+            }, this);
+            currStep++;
+        }
+    };
+
+	//gets the f-score of a cell using the Manhattan Method
+	maze.Model.prototype.getFScore = function(cell) {
+		var heuristic = Math.abs(cell[0] - this.end[0]) + Math.abs(cell[1] - this.end[1]);
+		return heuristic;
+		/* the commented out portion that follows would implement a tiebreaker that prefers paths
+		 * along the diagonal from start to end. Doesn't always find the shortest path.
+		 * Will be implemented when I figure out a way to give the user choice of heuristic
+		 */
+		//var dx1 = cell[0] - this.end[0],
+			//dy1 = cell[1] - this.end[1],
+			//dx2 = this.start[0] - this.end[0],
+			//dy2 = this.start[0] - this.end[1],
+			//cross = Math.abs(dx1*dy2 - dx2*dy1),
+			//heuristic = Math.abs(cell[0] - this.end[0]) + Math.abs(cell[1] - this.end[1]);
+		//return heuristic + cross*0.001;
+	};
+
+	maze.Model.prototype.contains = function(array, elem) {
+		return _.find(array, function(cell) {
+			if(cell) {
+				return _.arrayEquals(cell, elem);
+			}
+			return false;
+		});
+	};
+
+	maze.Model.prototype.swap = function(array, i1, i2) {
+		var temp = array[i1];
+		array[i1] = array[i2];
+		array[i2] = temp;
+	};
+
+	maze.Model.prototype.addToOpen = function(openList, f_score, elem) {
+		openList.push(elem);
+		f_score.push(this.getFScore(elem));
+		var m = openList.length - 1;
+		while(m !== 1) {
+			var mOver2 = Math.floor(m/2);
+			if(f_score[m] <= f_score[mOver2]) {
+				this.swap(openList,  m, mOver2);
+				this.swap(f_score, m, mOver2);
+				m = mOver2;
+			} else {
 				return;
 			}
-
-			_.each(set, function(val, cell) {
-				if(val === "open" && (set[current] === "closed" || f_score[cell] <= f_score[current])) {
-					current = cell;
-				}
-			});
-
-			set[current] = "closed";
-
-			var neighbors = this.getUnWalledNeighbors(this.grid[current]);
-			_.each(neighbors, function(neighbor) {
-				neighbor = neighbor.getLocation();
-				if(set[neighbor] !== "open" && set[neighbor] !== "closed") {
-					this.paths[neighbor] = _.map(current.split(","), function(num){return Number(num);});
-					set[neighbor] = "open";
-					f_score[neighbor] = Math.abs(neighbor[0] - target[0]) + Math.abs(neighbor[1] - target[1]);
-				}
-			}, this);
-			currStep++;
 		}
 	};
+
+	maze.Model.prototype.removeFromOpen = function(openList, f_score) {
+		var returnCell = openList[1],
+			v = 1,
+			u;
+
+		openList[1] = openList[openList.length-1];
+		openList.length -= 1;
+		f_score[1] = f_score[f_score.length-1];
+		f_score.length -= 1;
+
+		while(true) {
+			u = v;
+			if(2*u+1 < openList.length) {
+				if(f_score[u] >= f_score[2*u]) {
+					v = 2*u;
+				}
+				if(f_score[v] >= f_score[2*u+1]) {
+					v = 2*u+1;
+				}
+			} else if(2*u < openList.length) {
+				if(f_score[u] >= f_score[2*u]) {
+					v = 2*u;
+				}
+			}
+
+			if(v !== u) {
+				this.swap(openList, v, u);
+			} else {
+				return returnCell;
+			}
+		}
+	};
+
+	//}}}
 
 	maze.getDirections = function() {
 		return _.chain(_.range(-1, 2)).repeat(2).product().reject(function(pair) {
@@ -272,7 +343,6 @@
 		this.borders     = maze.createDirectionFlags();
 		this.walls       = maze.createDirectionFlags();
 		this.getLocation = _.constant([x, y]);
-		this.parentCell  = null;
 	};
 
 	maze.Cell.prototype.allWallsIntact = function() {

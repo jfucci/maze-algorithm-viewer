@@ -1,4 +1,4 @@
-/*global _:true, maze:true, $:true, document:true*/
+/*global _:true, maze:true, $:true, document:true, helpbutton:true*/
 (function() {
 	"use strict";
 
@@ -31,7 +31,7 @@
 			$("#algorithms").append("<option id=" + algorithm + ">" + name + "</option>");
 		}, this);
 
-		//set up the step select slider
+		//set up jquery widgets
 
 		$("#stepselect").slider({
 			max: that.model.getGridWidth()*that.model.getGridHeight(),
@@ -43,16 +43,14 @@
 			}
 		});
 
-		//
-
-		$("#helpdialog").dialog({ 
+		$("#helpdialog").dialog({
 			dialogClass: "no-close",
-			autoOpen: false, 
+			autoOpen: false,
 			draggable: false,
-			position: { 
-				my: "left center", 
-				at: "right center", 
-				of: helpbutton 
+			position: {
+				my: "left center",
+				at: "right center",
+				of: helpbutton
 			},
 			width: 550
 		});
