@@ -142,17 +142,17 @@
 	};
 
 	//calculates the paths between all the cells using Dijkstra's Algorithm
-	maze.Model.prototype.Dijkstras = function(step) {
-		this.paths      = {};
-		var grid        = this.grid,
-			unvisited   = {},
-			distances   = {},
-			currentNode = grid[this.start],
-			currStep    = 0;
+	maze.Model.prototype.DijkstrasOld = function(step) {
+		this.paths    = {};
+		var grid      = this.grid,
+			openList  = {},
+			distances = {},
+			current   = grid[this.start],
+			currStep  = 0;
 
 		for (var prop in grid) {
 			if(grid.hasOwnProperty(prop)) {
-				unvisited[prop] = grid[prop];
+				openList[prop] = grid[prop];
 			}
 		}
 
@@ -160,62 +160,56 @@
 			distances[cell.getLocation()] = Infinity;
 		}, this);
 
-		distances[currentNode.getLocation()] = 0;
+		distances[current.getLocation()] = 0;
 
-		//this.getUnWalledNeighbors(currentNode) will return null if there is no path between the start and stop
-		while(!_.isEmpty(unvisited)) {
-			if(_.arrayEquals(currentNode.getLocation(), this.end) || currStep === step) { //stop condition
-				this.traceShortestPath(currentNode.getLocation());
+		//this.getUnWalledNeighbors(current) will return null if there is no path between the start and stop
+		while(!_.isEmpty(openList)) {
+			if(_.arrayEquals(current.getLocation(), this.end) || currStep === step) { //stop condition
+				this.traceShortestPath(current.getLocation());
 				var visited = {};
 				_.each(this.grid, function(cell, location) {
-					if(!_.contains(unvisited, cell)) {
+					if(!_.contains(openList, cell)) {
 						visited[location] = cell;
 					}
 				});
-				this.pathData = {"step": currStep, "currentNode": currentNode.getLocation(), "visited": visited};
+				this.pathData = {"step": currStep, "currentNode": current.getLocation(), "visited": visited};
 				return;
 			}
 
-			_.each(this.getUnWalledNeighbors(currentNode), function(neighbor) {
-				var distance = distances[currentNode.getLocation()] + 1;
+			_.each(this.getUnWalledNeighbors(current), function(neighbor) {
+				var distance = distances[current.getLocation()] + 1;
 				if(distance < distances[neighbor.getLocation()]) {
 					distances[neighbor.getLocation()] = distance;
-					this.paths[neighbor.getLocation()] = currentNode.getLocation();
+					this.paths[neighbor.getLocation()] = current.getLocation();
 				}
 			}, this);
 
-			delete unvisited[currentNode.getLocation()];
+			delete openList[current.getLocation()];
 
-			//the next current node will be the one with the smallest distance in unvisited
+			//the next current node will be the one with the smallest distance in openList
 			var smallest = [Infinity];
-			_.each(unvisited, function(val, key) {
+			_.each(openList, function(val, key) {
 				if(distances[key] < smallest[0]) {
 					smallest = [distances[key], key];
 				}
 			});
 
-			currentNode = unvisited[smallest[1]];
+			current = openList[smallest[1]];
 			currStep++;
 		}
 	};
 
-	//functions used for an A* search {{{
+	maze.Model.prototype.Dijkstras = function(step) {
+		this.paths    = {};
+		var openList  = new maze.BinaryHeap(),
+			closedList = [],
+			current   = this.start,
+			target    = this.end,
+			currStep  = 0;
 
-	maze.Model.prototype.AStar = function(step) {
-		this.paths   = {};
-		//openList and f_score start with undefined because the binary heap needs the index 
-		//to start with 1 to simplify math; see http://www.policyalmanac.org/games/binaryHeaps.htm
-        var openList = [undefined],
-            closedList = [],
-            f_score  = [undefined],
-            current  = this.start,
-            target   = this.end,
-            currStep = 0;
+		openList.push(current, 0);
 
-        openList.push(current);
-        f_score.push(this.getFScore(current));
-
-        while(openList.length > 0) {
+		while(openList.array.length > 0) {
             if(_.arrayEquals(current, target) || currStep === step) { //stop condition
                 this.traceShortestPath(current);
                 var visited = closedList.map(function(cell){ return this.grid[cell]; }, this);
@@ -223,15 +217,47 @@
                 return;
             }
 
-            current = this.removeFromOpen(openList, f_score);
+			var distance = openList.sortArray[1] + 1;
+			current = openList.pop();
+			closedList.push(current);
+
+			_.each(this.getUnWalledNeighbors(this.grid[current]), function(neighbor) {
+				neighbor = neighbor.getLocation();
+                if(!this.contains(openList.array, neighbor) && !this.contains(closedList, neighbor)) {
+                    this.paths[neighbor] = current;
+					openList.push(neighbor, distance);
+                }
+			}, this);
+			currStep++;
+		}
+	};
+
+	maze.Model.prototype.AStar = function(step) {
+		this.paths   = {};
+        var openList = new maze.BinaryHeap(),
+            closedList = [],
+            current  = this.start,
+            target   = this.end,
+            currStep = 0;
+
+        openList.push(current, this.getFScore(current));
+
+        while(openList.array.length > 0) {
+            if(_.arrayEquals(current, target) || currStep === step) { //stop condition
+                this.traceShortestPath(current);
+                var visited = closedList.map(function(cell){ return this.grid[cell]; }, this);
+                this.pathData = {"step": currStep, "currentNode": current, "visited": visited};
+                return;
+            }
+
+            current = openList.pop();
             closedList.push(current);
 
-            var neighbors = this.getUnWalledNeighbors(this.grid[current]);
-            _.each(neighbors, function(neighbor) {
+            _.each(this.getUnWalledNeighbors(this.grid[current]), function(neighbor) {
                 neighbor = neighbor.getLocation();
-                if(!this.contains(openList, neighbor) && !this.contains(closedList, neighbor)) {
+                if(!this.contains(openList.array, neighbor) && !this.contains(closedList, neighbor)) {
                     this.paths[neighbor] = current;
-					this.addToOpen(openList, f_score, neighbor);
+					openList.push(neighbor, this.getFScore(neighbor));
                 }
             }, this);
             currStep++;
@@ -240,19 +266,24 @@
 
 	//gets the f-score of a cell using the Manhattan Method
 	maze.Model.prototype.getFScore = function(cell) {
-		var heuristic = Math.abs(cell[0] - this.end[0]) + Math.abs(cell[1] - this.end[1]);
-		return heuristic;
-		/* the commented out portion that follows would implement a tiebreaker that prefers paths
-		 * along the diagonal from start to end. Doesn't always find the shortest path.
-		 * Will be implemented when I figure out a way to give the user choice of heuristic
-		 */
-		//var dx1 = cell[0] - this.end[0],
-			//dy1 = cell[1] - this.end[1],
-			//dx2 = this.start[0] - this.end[0],
-			//dy2 = this.start[0] - this.end[1],
-			//cross = Math.abs(dx1*dy2 - dx2*dy1),
-			//heuristic = Math.abs(cell[0] - this.end[0]) + Math.abs(cell[1] - this.end[1]);
-		//return heuristic + cross*0.001;
+		return this.heuristic.manhattan(cell, this.end) + this.tieBreaker.diagonal(cell, this.start, this.end);
+	};
+	
+	maze.Model.prototype.heuristic = {
+		manhattan: function(cell, end) {
+			return Math.abs(cell[0] - end[0]) + Math.abs(cell[1] - end[1]);
+		}
+	};
+
+	maze.Model.prototype.tieBreaker = {
+		diagonal: function(cell, start, end) {
+			var dx1 = cell[0] - end[0],
+				dy1 = cell[1] - end[1],
+				dx2 = start[0] - end[0],
+				dy2 = start[0] - end[1],
+				cross = Math.abs(dx1*dy2 - dx2*dy1);
+			return cross*0.001;
+		}
 	};
 
 	maze.Model.prototype.contains = function(array, elem) {
@@ -263,63 +294,6 @@
 			return false;
 		});
 	};
-
-	maze.Model.prototype.swap = function(array, i1, i2) {
-		var temp = array[i1];
-		array[i1] = array[i2];
-		array[i2] = temp;
-	};
-
-	maze.Model.prototype.addToOpen = function(openList, f_score, elem) {
-		openList.push(elem);
-		f_score.push(this.getFScore(elem));
-		var m = openList.length - 1;
-		while(m !== 1) {
-			var mOver2 = Math.floor(m/2);
-			if(f_score[m] <= f_score[mOver2]) {
-				this.swap(openList,  m, mOver2);
-				this.swap(f_score, m, mOver2);
-				m = mOver2;
-			} else {
-				return;
-			}
-		}
-	};
-
-	maze.Model.prototype.removeFromOpen = function(openList, f_score) {
-		var returnCell = openList[1],
-			v = 1,
-			u;
-
-		openList[1] = openList[openList.length-1];
-		openList.length -= 1;
-		f_score[1] = f_score[f_score.length-1];
-		f_score.length -= 1;
-
-		while(true) {
-			u = v;
-			if(2*u+1 < openList.length) {
-				if(f_score[u] >= f_score[2*u]) {
-					v = 2*u;
-				}
-				if(f_score[v] >= f_score[2*u+1]) {
-					v = 2*u+1;
-				}
-			} else if(2*u < openList.length) {
-				if(f_score[u] >= f_score[2*u]) {
-					v = 2*u;
-				}
-			}
-
-			if(v !== u) {
-				this.swap(openList, v, u);
-			} else {
-				return returnCell;
-			}
-		}
-	};
-
-	//}}}
 
 	maze.getDirections = function() {
 		return _.chain(_.range(-1, 2)).repeat(2).product().reject(function(pair) {
@@ -349,6 +323,72 @@
 		return _.every(_.map(this.walls, function(flag) {
 			return flag;
 		}));
+	};
+
+	maze.BinaryHeap = function() {
+		//array and sortArray start with undefined because the binary heap needs the index 
+		//to start with 1 to simplify math; see http://www.policyalmanac.org/games/binaryHeaps.htm
+		this.array = [undefined];
+		this.sortArray = [undefined];
+	};
+
+	maze.BinaryHeap.prototype.arraySwap = function(array, i1, i2) {
+		var temp = array[i1];
+		array[i1] = array[i2];
+		array[i2] = temp;
+	};
+
+	maze.BinaryHeap.prototype.swap = function(i1, i2) {
+		this.arraySwap(this.array, i1, i2);
+		this.arraySwap(this.sortArray, i1, i2);
+	};
+
+	maze.BinaryHeap.prototype.push = function(elem, sortValue) {
+		this.array.push(elem);
+		this.sortArray.push(sortValue);
+		var m = this.array.length - 1;
+		while(m !== 1) {
+			var mOver2 = Math.floor(m/2);
+			if(this.sortArray[m] <= this.sortArray[mOver2]) {
+				this.swap(m, mOver2);
+				m = mOver2;
+			} else {
+				return;
+			}
+		}
+	};
+
+	maze.BinaryHeap.prototype.pop = function() {
+		var returnCell = this.array[1],
+			v = 1,
+			u;
+
+		this.array[1] = this.array[this.array.length-1];
+		this.array.length -= 1;
+		this.sortArray[1] = this.sortArray[this.sortArray.length-1];
+		this.sortArray.length -= 1;
+
+		while(true) {
+			u = v;
+			if(2*u+1 < this.array.length) {
+				if(this.sortArray[u] >= this.sortArray[2*u]) {
+					v = 2*u;
+				}
+				if(this.sortArray[v] >= this.sortArray[2*u+1]) {
+					v = 2*u+1;
+				}
+			} else if(2*u < this.array.length) {
+				if(this.sortArray[u] >= this.sortArray[2*u]) {
+					v = 2*u;
+				}
+			}
+
+			if(v !== u) {
+				this.swap(v, u);
+			} else {
+				return returnCell;
+			}
+		}
 	};
 
 }());
