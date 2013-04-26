@@ -59,7 +59,7 @@
 
 		$("#canvas").click(_.bind(this._mouseClick, this));
 
-		$("#algorithms").click(_.bind(function() {
+		$("#algorithms").change(_.bind(function() {
 			this.selectedAlgorithm = algorithms[$("#algorithms :selected").index()];
 			this.update();
 		}, this));
