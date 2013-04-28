@@ -17,10 +17,12 @@
 
 		this.model             = new maze.Model(this.setup);
 		this.view              = new maze.View(this.model);
-		this.selectedAlgorithm = algorithms[0];
+		this.selectedAlgorithm0 = algorithms[0];
+		this.selectedAlgorithm1 = algorithms[1];
 
 		//set up the algorithm select by appending to the html
 
+		/*
 		_.each(algorithms, function(algorithm) {
 			var name = algorithm;
 			if(~algorithm.indexOf("Star")) {
@@ -30,6 +32,7 @@
 			}
 			$("#algorithms").append("<option id=" + algorithm + ">" + name + "</option>");
 		}, this);
+		*/
 
 		//set up jquery widgets
 
@@ -39,6 +42,9 @@
 			step: 1,
 			value: 0,
 			slide: function(event, ui) {
+				that.update();
+			},
+			change: function(event, ui) {
 				that.update();
 			}
 		});
@@ -57,7 +63,8 @@
 
 		//click events
 
-		$("#canvas").click(_.bind(this._mouseClick, this));
+		$("#canvas0").click(_.bind(this._mouseClick, this));
+		$("#canvas1").click(_.bind(this._mouseClick, this));
 
 		$("#algorithms").change(_.bind(function() {
 			this.selectedAlgorithm = algorithms[$("#algorithms :selected").index()];
@@ -90,10 +97,13 @@
 	maze.Controller.prototype.update = function() {
 		var step = $("#stepselect").slider("option", "value");
 		if(this.model.start && this.model.end) {
-			this.model[this.selectedAlgorithm](step);
+			this.model[this.selectedAlgorithm0](step, 0);
+			this.model[this.selectedAlgorithm1](step, 1);
 		}
 		this.view.update();
-		$("#stepdisplay").text(this.model.pathData.step + 1);
+		for(var i = 0; i < this.model.pathData.length; i++) {
+			$("#stepdisplay" + i).text(this.model.pathData[i].step);
+		}
 	};
 
 	maze.Controller.prototype._mouseClick = function(event) {

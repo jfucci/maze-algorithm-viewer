@@ -26,8 +26,13 @@
         <script type="text/javascript" src="src/Controller.js"></script>
     </head>
     <body>
-		<div id="viewport">
-			<canvas id="canvas"></canvas>
+		<div id=canvasdiv0>
+			<canvas id="canvas0"></canvas>
+			<h5>Step Number: <span id="stepdisplay0">0</span></h5>
+		</div>
+		<div id=canvasdiv1>
+			<canvas id="canvas1"></canvas>
+			<h5>Step Number: <span id="stepdisplay1">0</span></h5>
 		</div>
 		<div id="controls">
 			<h3>Maze Algorithm Viewer</h3>
@@ -35,13 +40,7 @@
 			<br/><br/>
 			<a class ="btn" id="clear">Clear Grid</a>
 			<br/><br/>
-			<h5>
-				Step Slider <div id="stepselect"></div>
-				<br/>
-				Step Number: <span id="stepdisplay">0</span>
-				<br/><br/>
-				Algorithms: <select id="algorithms"></select>
-			</h5>
+			<h5>Step Slider <div id="stepselect"></div></h5>
 			<br/>
 			<a class="btn" id="helpbutton">Show Help</a>
 		</div>

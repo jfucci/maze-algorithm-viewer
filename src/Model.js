@@ -8,7 +8,9 @@
 		this.grid          = {};
 		this.start         = [0, 0];
 		this.end           = [this.getGridWidth()-1, this.getGridHeight()-1];
-		this.pathData      = {"step": null, "currentNode": null, "visited": null};
+		this.pathData      = [{"step": null, "currentNode": null, "visited": null},
+                              {"step": null, "currentNode": null, "visited": null}];
+		this.shortestPath  = [];
 		var coordinates    = _.product([_.range(this.getGridWidth()), _.range(this.getGridHeight())]);
 
 		_.each(coordinates, function(coordinate) {
@@ -133,10 +135,10 @@
 		}
 	};
 
-	maze.Model.prototype.traceShortestPath = function(currentNode) {
-		this.shortestPath = {};
+	maze.Model.prototype.traceShortestPath = function(canvasNum, currentNode) {
+		this.shortestPath[canvasNum] = {};
 		while(!_.arrayEquals(this.start, currentNode)) {
-			this.shortestPath[currentNode] = this.paths[currentNode];
+			this.shortestPath[canvasNum][currentNode] = this.paths[currentNode];
 			currentNode = this.paths[currentNode];
 		}
 	};
@@ -172,7 +174,7 @@
 						visited[location] = cell;
 					}
 				});
-				this.pathData = {"step": currStep, "currentNode": current.getLocation(), "visited": visited};
+				this.pathData[canvas] = {"step": currStep, "currentNode": current.getLocation(), "visited": visited};
 				return;
 			}
 
@@ -199,7 +201,7 @@
 		}
 	};
 
-	maze.Model.prototype.Dijkstras = function(step) {
+	maze.Model.prototype.Dijkstras = function(step, canvas) {
 		this.paths    = {};
 		var openList  = new maze.BinaryHeap(),
 			closedList = [],
@@ -211,9 +213,9 @@
 
 		while(openList.array.length > 0) {
             if(_.arrayEquals(current, target) || currStep === step) { //stop condition
-                this.traceShortestPath(current);
+                this.traceShortestPath(canvas, current);
                 var visited = closedList.map(function(cell){ return this.grid[cell]; }, this);
-                this.pathData = {"step": currStep, "currentNode": current, "visited": visited};
+                this.pathData[canvas] = {"step": currStep, "currentNode": current, "visited": visited};
                 return;
             }
 
@@ -232,7 +234,7 @@
 		}
 	};
 
-	maze.Model.prototype.AStar = function(step) {
+	maze.Model.prototype.AStar = function(step, canvas) {
 		this.paths   = {};
         var openList = new maze.BinaryHeap(),
             closedList = [],
@@ -244,9 +246,9 @@
 
         while(openList.array.length > 0) {
             if(_.arrayEquals(current, target) || currStep === step) { //stop condition
-                this.traceShortestPath(current);
+                this.traceShortestPath(canvas, current);
                 var visited = closedList.map(function(cell){ return this.grid[cell]; }, this);
-                this.pathData = {"step": currStep, "currentNode": current, "visited": visited};
+                this.pathData[canvas] = {"step": currStep, "currentNode": current, "visited": visited};
                 return;
             }
 
