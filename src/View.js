@@ -20,10 +20,10 @@
 	maze.View.prototype.setupCanvas = function() {
 		this.ctx = this.canvas.map(function(canvas) { return canvas[0].getContext("2d"); });
 
-		var width = window.innerWidth*.35;
+		var width = window.innerWidth*0.35;
 		var height = width*this.model.getGridHeight()/this.model.getGridWidth();
 
-		_.each(this.canvas, function(canvas) { 
+		_.each(this.canvas, function(canvas) {
 			canvas[0].width = width;
 			canvas[0].height = height;
 		});
@@ -35,7 +35,7 @@
 		this.update();
 	};
 
-	maze.View.prototype._mouseClick = function(event) {
+	maze.View.prototype._mouseDown = function(event) {
 		var mousePos = [this.getMouseXCoord(event), this.getMouseYCoord(event)],
 			mousedCell = mousePos.map(Math.floor),
 			x = Math.round(mousePos[0], 0),
@@ -50,10 +50,6 @@
 				}
 				this.selectedCorner = null;
 			}
-		} else if(!this.model.start) {
-			this.model.start = mousedCell;
-		} else if(!this.model.end) {
-			this.model.end = mousedCell;
 		} else if(_.arrayEquals(this.model.start, mousedCell)) {
 			this.model.start = null;
 		} else if(_.arrayEquals(this.model.end, mousedCell)) {
@@ -62,8 +58,22 @@
 		this.update();
 	};
 
+	maze.View.prototype._mouseUp = function(event) {
+		var mousePos = [this.getMouseXCoord(event), this.getMouseYCoord(event)],
+			mousedCell = mousePos.map(Math.floor),
+			x = Math.round(mousePos[0], 0),
+			y = Math.round(mousePos[1], 0);
+
+		if(!this.model.start) {
+			this.model.start = mousedCell;
+		} else if(!this.model.end) {
+			this.model.end = mousedCell;
+		this.update();
+		}
+	};
+
 	maze.View.prototype._mouseMove = function(event) {
-		var mousePos = [this.getMouseXCoord(event), this.getMouseYCoord(event)];
+		var mousePos = [this.getMouseXCoord(event) - 0.5, this.getMouseYCoord(event) - 0.5];
 		if(!this.model.start) {
 			this.update();
 			this.drawSquare(0, mousePos, "green");
@@ -121,29 +131,29 @@
 						var wallCenterOffset = _.add(direction, 1 / 2);
 						//reverse computes the perpendicular direction
 						var wallHeading = direction.reverse();
-	
+
 						var wallStartOffset = _.add(wallCenterOffset, wallHeading);
 						var wallEndOffset = _.add(wallCenterOffset, _.multiply(wallHeading, -1));
-	
+
 						this.drawWall(i, cell, wallStartOffset, wallEndOffset);
 					}
 				}, this);
 			}, this);
-	
+
 			if(pathData.currentNode && this.model.start) { //requires start or the when moving the start the old start will be orange
 				this.drawSquare(i, pathData.currentNode, "orange");
 			}
-	
+
 			if(this.model.start) {
 				this.drawSquare(i, this.model.start, "green");
 			}
-	
+
 			if(this.model.end) {
 				this.drawSquare(i, this.model.end, "red");
 			}
-	
+
 			this._stroke(i, 1 / 2, "black");
-	
+
 			_.each(this.model.grid, function(cell) {
 				this.drawCellCorners(i, cell);
 			}, this);

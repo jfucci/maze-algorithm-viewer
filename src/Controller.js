@@ -63,8 +63,8 @@
 
 		//click events
 
-		$("#canvas0").click(_.bind(this._mouseClick, this));
-		$("#canvas1").click(_.bind(this._mouseClick, this));
+		_.each(this.view.canvas, function(canvas) { canvas.mousedown(_.bind(this._mouseDown, this)); }, this);
+		_.each(this.view.canvas, function(canvas) { canvas.mouseup(_.bind(this._mouseUp, this)); }, this);
 
 		$("#algorithms").change(_.bind(function() {
 			this.selectedAlgorithm = algorithms[$("#algorithms :selected").index()];
@@ -106,8 +106,13 @@
 		}
 	};
 
-	maze.Controller.prototype._mouseClick = function(event) {
-		this.view._mouseClick(event);
+	maze.Controller.prototype._mouseDown = function(event) {
+		this.view._mouseDown(event);
+		this.update();
+	};
+
+	maze.Controller.prototype._mouseUp = function(event) {
+		this.view._mouseUp(event);
 		this.update();
 	};
 }());

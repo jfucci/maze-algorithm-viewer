@@ -144,7 +144,7 @@
 	};
 
 	//calculates the paths between all the cells using Dijkstra's Algorithm
-	maze.Model.prototype.DijkstrasOld = function(step) {
+	maze.Model.prototype.DijkstrasOld = function(step, canvasNum) {
 		this.paths    = {};
 		var grid      = this.grid,
 			openList  = {},
@@ -174,7 +174,7 @@
 						visited[location] = cell;
 					}
 				});
-				this.pathData[canvas] = {"step": currStep, "currentNode": current.getLocation(), "visited": visited};
+				this.pathData[canvasNum] = {"step": currStep, "currentNode": current.getLocation(), "visited": visited};
 				return;
 			}
 
@@ -201,7 +201,7 @@
 		}
 	};
 
-	maze.Model.prototype.Dijkstras = function(step, canvas) {
+	maze.Model.prototype.Dijkstras = function(step, canvasNum) {
 		this.paths    = {};
 		var openList  = new maze.BinaryHeap(),
 			closedList = [],
@@ -213,9 +213,9 @@
 
 		while(openList.array.length > 0) {
             if(_.arrayEquals(current, target) || currStep === step) { //stop condition
-                this.traceShortestPath(canvas, current);
+                this.traceShortestPath(canvasNum, current);
                 var visited = closedList.map(function(cell){ return this.grid[cell]; }, this);
-                this.pathData[canvas] = {"step": currStep, "currentNode": current, "visited": visited};
+                this.pathData[canvasNum] = {"step": currStep, "currentNode": current, "visited": visited};
                 return;
             }
 
@@ -234,7 +234,7 @@
 		}
 	};
 
-	maze.Model.prototype.AStar = function(step, canvas) {
+	maze.Model.prototype.AStar = function(step, canvasNum) {
 		this.paths   = {};
         var openList = new maze.BinaryHeap(),
             closedList = [],
@@ -246,9 +246,9 @@
 
         while(openList.array.length > 0) {
             if(_.arrayEquals(current, target) || currStep === step) { //stop condition
-                this.traceShortestPath(canvas, current);
+                this.traceShortestPath(canvasNum, current);
                 var visited = closedList.map(function(cell){ return this.grid[cell]; }, this);
-                this.pathData[canvas] = {"step": currStep, "currentNode": current, "visited": visited};
+                this.pathData[canvasNum] = {"step": currStep, "currentNode": current, "visited": visited};
                 return;
             }
 
@@ -270,7 +270,7 @@
 	maze.Model.prototype.getFScore = function(cell) {
 		return this.heuristic.manhattan(cell, this.end) + this.tieBreaker.diagonal(cell, this.start, this.end);
 	};
-	
+
 	maze.Model.prototype.heuristic = {
 		manhattan: function(cell, end) {
 			return Math.abs(cell[0] - end[0]) + Math.abs(cell[1] - end[1]);
