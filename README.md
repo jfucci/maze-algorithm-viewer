@@ -21,12 +21,12 @@ Square Colors and Meaning
 Usage
 -----
 
-* The "Generate Maze" button generates a new maze using a depth-first search. More methods to come.
+* The "Generate Maze" button generates a new maze using a depth-first search.
 * Modify walls or create your own maze by clicking two cell corners in the same column or row.
 * Use the step slider to view the algorithm's progress at a specific point in time.
 * The step number is the total number of steps the algorithm has gone through. It will not count past the solving of the maze.
-* Use the drop-down menu to change the algorithm used to solve the maze. The maze will update the cells, staying at the time specified by the step slider.
-* The start and end cells are able to be moved. Simply click on one, and then click on the cell to which it should be moved.
+* Use the drop-down menus to change the algorithm used to solve the maze. The maze will update the cells, staying at the time specified by the step slider.
+* The start and end cells are able to be moved via click-and-drag
 
 Algorithms Included
 -------------------
@@ -43,7 +43,6 @@ To-do
 
 * implement more solving algorithms  
 * improve UI (help dialog, among other things) 
-* multiple canvases? (e.g. one per algorithm)  
 * add a way to visualize generating algorithms  
 * add a way to choose generating algorithms  
 * implement more generating algorithms 
