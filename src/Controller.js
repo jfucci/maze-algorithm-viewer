@@ -54,8 +54,8 @@
 			autoOpen: false,
 			draggable: false,
 			position: {
-				my: "left center",
-				at: "right center",
+				my: "right center",
+				at: "left center",
 				of: helpbutton
 			},
 			width: 550
@@ -63,8 +63,12 @@
 
 		//click events
 
-		_.each(this.view.canvas, function(canvas) { canvas.mousedown(_.bind(this._mouseDown, this)); }, this);
-		_.each(this.view.canvas, function(canvas) { canvas.mouseup(_.bind(this._mouseUp, this)); }, this);
+		_.each(this.view.canvas, function(canvas) {
+			canvas.mousedown(_.bind(this._mouseDown, this));
+			canvas.mouseup(_.bind(this._mouseUp, this));
+		}, this);
+
+		document.onselectstart = function() { return false; }; //disable text selection
 
 		$("#algorithms").change(_.bind(function() {
 			this.selectedAlgorithm = algorithms[$("#algorithms :selected").index()];

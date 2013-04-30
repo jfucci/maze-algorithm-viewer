@@ -68,8 +68,8 @@
 			this.model.start = mousedCell;
 		} else if(!this.model.end) {
 			this.model.end = mousedCell;
-		this.update();
 		}
+		this.update();
 	};
 
 	maze.View.prototype._mouseMove = function(event) {
