@@ -8,7 +8,7 @@
 
 	maze.Controller = function() {
 		var that       = this,
-			algorithms = ["Dijkstras", "AStar"];
+			algorithms = ["Dijkstras", "AStarDiagonalTieBreaker", "AStarNoTieBreaker", "DepthFirstSearch"];
 
 		this.setup = {
 			gridHeight: 10, //number of cells per column

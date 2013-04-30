@@ -234,7 +234,37 @@
 		}
 	};
 
-	maze.Model.prototype.AStar = function(step, canvasNum) {
+	maze.Model.prototype.DepthFirstSearch = function(step, canvasNum) {
+		this.paths   = {};
+        var openList = [],
+            closedList = [],
+            current  = this.start,
+            target   = this.end,
+            currStep = 0;
+
+		openList.push(current);
+		while(openList.length > 0) {
+			current = openList.pop();
+            if(_.arrayEquals(current, target) || currStep === step) { //stop condition
+                this.traceShortestPath(canvasNum, current);
+                var visited = closedList.map(function(cell){ return this.grid[cell]; }, this);
+                this.pathData[canvasNum] = {"step": currStep, "currentNode": current, "visited": visited};
+                return;
+			}
+
+            _.each(this.getUnWalledNeighbors(this.grid[current]), function(neighbor) {
+                neighbor = neighbor.getLocation();
+                if(!this.contains(openList, neighbor) && !this.contains(closedList, neighbor)) {
+                    this.paths[neighbor] = current;
+					openList.push(neighbor);
+				}
+            }, this);
+			closedList.push(current);
+            currStep++;
+		}
+	}
+
+	maze.Model.prototype.AStar = function(step, canvasNum, tieBreaker) {
 		this.paths   = {};
         var openList = new maze.BinaryHeap(),
             closedList = [],
@@ -242,7 +272,7 @@
             target   = this.end,
             currStep = 0;
 
-        openList.push(current, this.getFScore(current));
+        openList.push(current, this.getFScore(current, tieBreaker));
 
         while(openList.array.length > 0) {
             if(_.arrayEquals(current, target) || currStep === step) { //stop condition
@@ -259,16 +289,24 @@
                 neighbor = neighbor.getLocation();
                 if(!this.contains(openList.array, neighbor) && !this.contains(closedList, neighbor)) {
                     this.paths[neighbor] = current;
-					openList.push(neighbor, this.getFScore(neighbor));
+					openList.push(neighbor, this.getFScore(neighbor, tieBreaker));
                 }
             }, this);
             currStep++;
         }
     };
 
+	maze.Model.prototype.AStarNoTieBreaker = function(step, canvasNum) {
+		this.AStar(step, canvasNum, "none");
+	}
+
+	maze.Model.prototype.AStarDiagonalTieBreaker = function(step, canvasNum) {
+		this.AStar(step, canvasNum, "diagonal");
+	}
+
 	//gets the f-score of a cell using the Manhattan Method
-	maze.Model.prototype.getFScore = function(cell) {
-		return this.heuristic.manhattan(cell, this.end) + this.tieBreaker.diagonal(cell, this.start, this.end);
+	maze.Model.prototype.getFScore = function(cell, tieBreaker) {
+		return this.heuristic.manhattan(cell, this.end) + this.tieBreaker[tieBreaker](cell, this.start, this.end);
 	};
 
 	maze.Model.prototype.heuristic = {
@@ -285,6 +323,9 @@
 				dy2 = start[0] - end[1],
 				cross = Math.abs(dx1*dy2 - dx2*dy1);
 			return cross*0.001;
+		},
+		none: function() {
+			return 0;
 		}
 	};
 
