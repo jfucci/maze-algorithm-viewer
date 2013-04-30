@@ -15,24 +15,15 @@
 			gridWidth: 10  //number of cells per row
 		};
 
-		this.model             = new maze.Model(this.setup);
-		this.view              = new maze.View(this.model);
+		this.model              = new maze.Model(this.setup);
+		this.view               = new maze.View(this.model);
 		this.selectedAlgorithm0 = algorithms[0];
 		this.selectedAlgorithm1 = algorithms[1];
 
 		//set up the algorithm select by appending to the html
 
-		/*
-		_.each(algorithms, function(algorithm) {
-			var name = algorithm;
-			if(~algorithm.indexOf("Star")) {
-				name = algorithm.split("Star")[0] + "*" + algorithm.split("Star")[1];
-			} else if(algorithm[algorithm.length-1] === "s") {
-				name = algorithm.substring(0, algorithm.length-1) + "'s";
-			}
-			$("#algorithms").append("<option id=" + algorithm + ">" + name + "</option>");
-		}, this);
-		*/
+		this.setupMenu(algorithms, 0);
+		this.setupMenu(algorithms, 1);
 
 		//set up jquery widgets
 
@@ -70,8 +61,13 @@
 
 		document.onselectstart = function() { return false; }; //disable text selection
 
-		$("#algorithms").change(_.bind(function() {
-			this.selectedAlgorithm = algorithms[$("#algorithms :selected").index()];
+		$("#algorithms0").change(_.bind(function() {
+			this.selectedAlgorithm0 = algorithms[$("#algorithms0 :selected").index()];
+			this.update();
+		}, this));
+
+		$("#algorithms1").change(_.bind(function() {
+			this.selectedAlgorithm1 = algorithms[$("#algorithms1 :selected").index()];
 			this.update();
 		}, this));
 
@@ -108,6 +104,23 @@
 		for(var i = 0; i < this.model.pathData.length; i++) {
 			$("#stepdisplay" + i).text(this.model.pathData[i].step);
 		}
+	};
+
+	maze.Controller.prototype.setupMenu = function(algorithms, menu) {
+		_.each(algorithms, function(algorithm) {
+			var name = algorithm;
+			if(~algorithm.indexOf("Star")) {
+				name = algorithm.split("Star")[0] + "*" + algorithm.split("Star")[1];
+			} else if(algorithm[algorithm.length-1] === "s") {
+				name = algorithm.substring(0, algorithm.length-1) + "'s";
+			}
+
+			if(algorithms.indexOf(algorithm) === menu) {
+				$("#algorithms" + menu).append("<option id=" + algorithm + " selected>" + name + "</option>");
+			} else {
+				$("#algorithms" + menu).append("<option id=" + algorithm + ">" + name + "</option>");
+			}
+		}, this);
 	};
 
 	maze.Controller.prototype._mouseDown = function(event) {

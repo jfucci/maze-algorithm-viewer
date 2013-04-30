@@ -60,9 +60,7 @@
 
 	maze.View.prototype._mouseUp = function(event) {
 		var mousePos = [this.getMouseXCoord(event), this.getMouseYCoord(event)],
-			mousedCell = mousePos.map(Math.floor),
-			x = Math.round(mousePos[0], 0),
-			y = Math.round(mousePos[1], 0);
+			mousedCell = mousePos.map(Math.floor);
 
 		if(!this.model.start) {
 			this.model.start = mousedCell;
