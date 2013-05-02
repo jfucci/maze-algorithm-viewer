@@ -34,7 +34,9 @@ Algorithms Included
 <dl>
 	<dt>Maze Solving</dt>
 	<dd>- Dijkstra's</dd>
-	<dd>- A*</dd>
+	<dd>- A* with a tiebreaker for f-score calculation</dd>
+	<dd>- A* without a tiebreaker for f-score calculation</dd>
+	<dd>- Depth First Search</dd>
 	<dt>Maze Generating</dt>
 </dl>
 

@@ -9,6 +9,13 @@
 	maze.Controller = function() {
 		var that       = this,
 			algorithms = ["Dijkstras", "AStarDiagonalTieBreaker", "AStarNoTieBreaker", "DepthFirstSearch"];
+            this.description = ["Expands by taking the next unvisited cell with the shortest step distance from the start cell.",
+                                "Calculates the f-score using the linear distance from the current cell to the end +" + 
+                                    " the current cell's distance from the line connecting the start and end cells *.001;" + 
+                                    " expands by taking the next unvisited cell with the lowest f-score.",
+                                "Calculates the f-score using the linear distance from the current cell to the end;" + 
+                                    " expands by taking the next unvisited cell with the lowest f-score.",
+                                "Expands by taking the next unvisited cell along the current branch. Does not find the shortest path."];
 
 		this.setup = {
 			gridHeight: 10, //number of cells per column
@@ -21,9 +28,12 @@
 		this.selectedAlgorithm1 = algorithms[1];
 
 		//set up the algorithm select by appending to the html
-
 		this.setupMenu(algorithms, 0);
 		this.setupMenu(algorithms, 1);
+
+        //set the descriptions for the default algorithms
+        this.setDescription(0, 0);
+        this.setDescription(1, 1);
 
 		//set up jquery widgets
 
@@ -63,11 +73,14 @@
 
 		$("#algorithms0").change(_.bind(function() {
 			this.selectedAlgorithm0 = algorithms[$("#algorithms0 :selected").index()];
+            this.setDescription(0, $("#algorithms0 :selected").index());
 			this.update();
 		}, this));
 
+
 		$("#algorithms1").change(_.bind(function() {
 			this.selectedAlgorithm1 = algorithms[$("#algorithms1 :selected").index()];
+            this.setDescription(1, $("#algorithms1 :selected").index());
 			this.update();
 		}, this));
 
@@ -109,11 +122,11 @@
 	maze.Controller.prototype.setupMenu = function(algorithms, menu) {
 		_.each(algorithms, function(algorithm) {
 			var name = algorithm;
-			if(~algorithm.indexOf("Star")) {
-				name = algorithm.split("Star")[0] + "*" + algorithm.split("Star")[1];
-			} else if(algorithm[algorithm.length-1] === "s") {
-				name = algorithm.substring(0, algorithm.length-1) + "'s";
-			}
+
+            name = name.replace(/s$/g, "'s"); //replace the trailing s with 's in Dijkstras
+            name = name.replace(/Star/g, "* "); //replace the Star in AStar with *
+            name = name.replace(/([a-z])([A-Z])/g, '$1 $2'); //insert spaces before capital letters 
+                                                             //(e.g. DepthFirstSearch -> Depth First Search)
 
 			if(algorithms.indexOf(algorithm) === menu) {
 				$("#algorithms" + menu).append("<option id=" + algorithm + " selected>" + name + "</option>");
@@ -122,6 +135,11 @@
 			}
 		}, this);
 	};
+
+    maze.Controller.prototype.setDescription = function(descriptionNum, index) {
+        $("#description" + descriptionNum).text(this.description[index]);
+        $("#description" + descriptionNum).width($("#canvas" + descriptionNum).width());
+    };
 
 	maze.Controller.prototype._mouseDown = function(event) {
 		this.view._mouseDown(event);
