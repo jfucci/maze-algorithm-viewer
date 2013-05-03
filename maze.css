@@ -29,9 +29,18 @@ body, html {
 	border:1px solid gray;
 }
 
+#description0{
+    text-align: justify;
+}
+
+#description1{
+    text-align: justify;
+}
+
 #controls{
 	float:left;
 	margin:1%;
+    width: 20%;
 }
 
 .no-close .ui-dialog-titlebar-close {
