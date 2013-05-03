@@ -7,15 +7,15 @@
 	});
 
 	maze.Controller = function() {
-		var that       = this,
-			algorithms = ["Dijkstras", "AStarDiagonalTieBreaker", "AStarNoTieBreaker", "DepthFirstSearch"];
-            this.description = ["Expands by taking the next unvisited cell with the shortest step distance from the start cell.",
-                                "Calculates the f-score using the linear distance from the current cell to the end +" + 
-                                    " the current cell's distance from the line connecting the start and end cells *.001;" + 
-                                    " expands by taking the next unvisited cell with the lowest f-score.",
-                                "Calculates the f-score using the linear distance from the current cell to the end;" + 
-                                    " expands by taking the next unvisited cell with the lowest f-score.",
-                                "Expands by taking the next unvisited cell along the current branch. Does not find the shortest path."];
+		var that         = this,
+			algorithms   = ["Dijkstras", "AStarDiagonalTieBreaker", "AStarNoTieBreaker", "DepthFirstSearch"],
+            descriptions = ["Expands by taking the next unvisited cell with the shortest step distance from the start cell.",
+                            "Calculates the f-score using the linear distance from the current cell to the end +" + 
+                                " the current cell's distance from the line connecting the start and end cells *.001;" + 
+                                " expands by taking the next unvisited cell with the lowest f-score.",
+                            "Calculates the f-score using the linear distance from the current cell to the end;" + 
+                                " expands by taking the next unvisited cell with the lowest f-score.",
+                            "Expands by taking the next unvisited cell along the current branch. Does not find the shortest path."];
 
 		this.setup = {
 			gridHeight: 10, //number of cells per column
@@ -26,14 +26,6 @@
 		this.view               = new maze.View(this.model);
 		this.selectedAlgorithm0 = algorithms[0];
 		this.selectedAlgorithm1 = algorithms[1];
-
-		//set up the algorithm select by appending to the html
-		this.setupMenu(algorithms, 0);
-		this.setupMenu(algorithms, 1);
-
-        //set the descriptions for the default algorithms
-        this.setDescription(0, 0);
-        this.setDescription(1, 1);
 
 		//set up jquery widgets
 
@@ -69,18 +61,18 @@
 			canvas.mouseup(_.bind(this._mouseUp, this));
 		}, this);
 
-		document.onselectstart = function() { return false; }; //disable text selection
-
 		$("#algorithms0").change(_.bind(function() {
-			this.selectedAlgorithm0 = algorithms[$("#algorithms0 :selected").index()];
-            this.setDescription(0, $("#algorithms0 :selected").index());
+            var index = $("#algorithms0 :selected").index();
+			this.selectedAlgorithm0 = algorithms[index];
+            $("#description0").text(descriptions[index]);
 			this.update();
 		}, this));
 
 
 		$("#algorithms1").change(_.bind(function() {
-			this.selectedAlgorithm1 = algorithms[$("#algorithms1 :selected").index()];
-            this.setDescription(1, $("#algorithms1 :selected").index());
+            var index = $("#algorithms1 :selected").index();
+			this.selectedAlgorithm1 = algorithms[index];
+            $("#description1").text(descriptions[index]);
 			this.update();
 		}, this));
 
@@ -105,6 +97,21 @@
 				$("#helpbutton").text("Hide Help");
 			}
 		}));
+
+		//set up the algorithm select by appending to the html
+		this.setupMenu(algorithms, 0);
+		this.setupMenu(algorithms, 1);
+
+        //show the descriptions for the default algorithms
+		$("#algorithms0").change();
+		$("#algorithms1").change();
+
+        //set the widths of the descriptions to the width of a canvas
+        $("#description0").width($("#canvas0").width());
+        $("#description1").width($("#canvas1").width());
+
+        //disable text selection
+		document.onselectstart = function() { return false; }; 
 	};
 
 	maze.Controller.prototype.update = function() {
@@ -136,16 +143,11 @@
 		}, this);
 	};
 
-    maze.Controller.prototype.setDescription = function(descriptionNum, index) {
-        $("#description" + descriptionNum).text(this.description[index]);
-        $("#description" + descriptionNum).width($("#canvas" + descriptionNum).width());
-    };
-
 	maze.Controller.prototype._mouseDown = function(event) {
 		this.view._mouseDown(event);
 		this.update();
 	};
-
+    
 	maze.Controller.prototype._mouseUp = function(event) {
 		this.view._mouseUp(event);
 		this.update();
