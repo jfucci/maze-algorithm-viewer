@@ -119,22 +119,6 @@
 		neighbor.walls[_.multiply(direction, -1)] = !neighbor.walls[_.multiply(direction, -1)];
 	};
 
-	maze.Model.prototype.setWalls = function(p1, p2) {
-		var difference = _.subtract(p2, p1);
-		var direction = [difference[0] && difference[0]/Math.abs(difference[0]),  //get 0, 1, or -1
-						 difference[1] && difference[1]/Math.abs(difference[1])]; //get 0, 1, or -1
-		var translation; //factor to translate the corner coordinate to the cell coordinate
-		while(!_.arrayEquals(p1, p2)){
-			if(p1[0] > p2[0] || p1[1] < p2[1]) {
-				translation = [-1, 0];
-			} else {
-				translation = [0, -1];
-			}
-			this.manipulateWall(this.grid[_.add(p1, translation)], [direction[1], direction[0]]);
-			p1 = _.add(p1, direction);
-		}
-	};
-
 	maze.Model.prototype.traceShortestPath = function(canvasNum, currentNode) {
 		this.shortestPath[canvasNum] = {};
 		while(!_.arrayEquals(this.start, currentNode)) {

@@ -112,6 +112,9 @@
             this.setupDraggableCell(i, "start");
             this.setupDraggableCell(i, "end");
         }
+        _.each(this.view.paper, function(paper) {
+            paper.canvas.onmousedown = _.bind(this.onMouseDown, this);
+        }, this);
 	};
 
 	maze.Controller.prototype.update = function() {
@@ -159,4 +162,10 @@
             this.update();
         }, this);
     };
+
+    maze.Controller.prototype.onMouseDown = function(e) {
+        this.view.onMouseDown(e);
+        this.update();
+    };
+
 }());
