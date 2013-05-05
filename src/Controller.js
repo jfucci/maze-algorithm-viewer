@@ -10,10 +10,10 @@
 		var that         = this,
 			algorithms   = ["Dijkstras", "AStarDiagonalTieBreaker", "AStarNoTieBreaker", "DepthFirstSearch"],
             descriptions = ["Expands by taking the next unvisited cell with the shortest step distance from the start cell.",
-                            "Calculates the f-score using the linear distance from the current cell to the end +" + 
-                                " the current cell's distance from the line connecting the start and end cells *.001;" + 
+                            "Calculates the f-score using the linear distance from the current cell to the end +" +
+                                " the current cell's distance from the line connecting the start and end cells *.001;" +
                                 " expands by taking the next unvisited cell with the lowest f-score.",
-                            "Calculates the f-score using the linear distance from the current cell to the end;" + 
+                            "Calculates the f-score using the linear distance from the current cell to the end;" +
                                 " expands by taking the next unvisited cell with the lowest f-score.",
                             "Expands by taking the next unvisited cell along the current branch. Does not find the shortest path."];
 
@@ -56,11 +56,6 @@
 
 		//click events
 
-		_.each(this.view.canvas, function(canvas) {
-			canvas.mousedown(_.bind(this._mouseDown, this));
-			canvas.mouseup(_.bind(this._mouseUp, this));
-		}, this);
-
 		$("#algorithms0").change(_.bind(function() {
             var index = $("#algorithms0 :selected").index();
 			this.selectedAlgorithm0 = algorithms[index];
@@ -80,10 +75,12 @@
 			this.model.generate();
 			$("#stepselect").slider("value", 0);
 			this.update();
+            this.view.drawMaze();
 		}, this));
 
 		$("#clear").click(_.bind(function() {
 			this.model.clearGrid();
+			this.view.clearBoard();
 			$("#stepselect").slider("value", 0);
 			this.update();
 		}, this));
@@ -102,16 +99,19 @@
 		this.setupMenu(algorithms, 0);
 		this.setupMenu(algorithms, 1);
 
+        //set the widths of the descriptions to the width of a canvas
+        $("#description0").width($("#paper0").width());
+        $("#description1").width($("#paper1").width());
+
         //show the descriptions for the default algorithms
 		$("#algorithms0").change();
 		$("#algorithms1").change();
 
-        //set the widths of the descriptions to the width of a canvas
-        $("#description0").width($("#canvas0").width());
-        $("#description1").width($("#canvas1").width());
-
-        //disable text selection
-		document.onselectstart = function() { return false; }; 
+        //setup the onmouseup events for the start and end cells
+        for(var i = 0; i < this.view.paper.length; i++) {
+            this.setupDraggableCell(i, "start");
+            this.setupDraggableCell(i, "end");
+        }
 	};
 
 	maze.Controller.prototype.update = function() {
@@ -132,7 +132,7 @@
 
             name = name.replace(/s$/g, "'s"); //replace the trailing s with 's in Dijkstras
             name = name.replace(/Star/g, "* "); //replace the Star in AStar with *
-            name = name.replace(/([a-z])([A-Z])/g, '$1 $2'); //insert spaces before capital letters 
+            name = name.replace(/([a-z])([A-Z])/g, "$1 $2"); //insert spaces before capital letters 
                                                              //(e.g. DepthFirstSearch -> Depth First Search)
 
 			if(algorithms.indexOf(algorithm) === menu) {
@@ -143,13 +143,20 @@
 		}, this);
 	};
 
-	maze.Controller.prototype._mouseDown = function(event) {
-		this.view._mouseDown(event);
-		this.update();
-	};
-    
-	maze.Controller.prototype._mouseUp = function(event) {
-		this.view._mouseUp(event);
-		this.update();
-	};
+    maze.Controller.prototype.setupDraggableCell = function(paperNum, cell) {
+        var otherNum;
+        if(paperNum === 1) {
+            otherNum = 0;
+        } else {
+            otherNum = 1;
+        }
+        this.view[cell][paperNum]["mouseup"](function(e) {
+            var x = Math.floor(e.offsetX/(this.view.paper[0].width/this.model.getGridWidth()));
+            var y = Math.floor(e.offsetY/(this.view.paper[0].height/this.model.getGridHeight()));
+            this.model[cell] = [x, y];
+            this.view[cell][paperNum]["attr"](this.view.getCellDimensions(0, [x, y]));
+            this.view[cell][otherNum]["attr"](this.view.getCellDimensions(0, [x, y]));
+            this.update();
+        }, this);
+    };
 }());

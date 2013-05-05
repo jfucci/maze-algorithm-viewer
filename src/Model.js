@@ -262,7 +262,7 @@
 			closedList.push(current);
             currStep++;
 		}
-	}
+	};
 
 	maze.Model.prototype.AStar = function(step, canvasNum, tieBreaker) {
 		this.paths   = {};
@@ -298,11 +298,11 @@
 
 	maze.Model.prototype.AStarNoTieBreaker = function(step, canvasNum) {
 		this.AStar(step, canvasNum, "none");
-	}
+	};
 
 	maze.Model.prototype.AStarDiagonalTieBreaker = function(step, canvasNum) {
 		this.AStar(step, canvasNum, "diagonal");
-	}
+	};
 
 	//gets the f-score of a cell using the Manhattan Method
 	maze.Model.prototype.getFScore = function(cell, tieBreaker) {
