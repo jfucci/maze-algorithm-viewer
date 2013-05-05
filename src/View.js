@@ -90,11 +90,11 @@
                     directions.push([2, 0]);
                 }
                 if(cellY === this.model.getGridHeight()-1) {
-                    directions.push([0, 1.8]); //1.8 because the bottom gets cut off for some reason, 
+                    directions.push([0, 1.7]); //1.8 because the bottom gets cut off for some reason, 
                                                //so a smaller translation is needed for the square to be visible
                 }
                 if(cellX === this.model.getGridWidth()-1 && cellY === this.model.getGridHeight()-1) {
-                    directions.push([2, 1.8]);
+                    directions.push([2, 1.7]);
                 }
                 _.each(directions, function(d) {
                     var w = 4*this.hPixel*this.paper[i].width,

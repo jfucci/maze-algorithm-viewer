@@ -151,8 +151,8 @@
             otherNum = 1;
         }
         this.view[cell][paperNum]["mouseup"](function(e) {
-            var x = Math.floor(e.offsetX/(this.view.paper[0].width/this.model.getGridWidth()));
-            var y = Math.floor(e.offsetY/(this.view.paper[0].height/this.model.getGridHeight()));
+            var x = Math.floor(e.layerX/(this.view.paper[0].width/this.model.getGridWidth()));
+            var y = Math.floor(e.layerY/(this.view.paper[0].height/this.model.getGridHeight()));
             this.model[cell] = [x, y];
             this.view[cell][paperNum]["attr"](this.view.getCellDimensions(0, [x, y]));
             this.view[cell][otherNum]["attr"](this.view.getCellDimensions(0, [x, y]));
