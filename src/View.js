@@ -52,7 +52,11 @@
     };
 
     maze.View.prototype.setDraggableSq = function(paperNum, cellLocation, color) {
-        return this.setSquare(paperNum, cellLocation, color).drag(this.onMove, this.onStart, this.onEnd);
+        return this.setSquare(paperNum, cellLocation, color)
+            .drag(this.onMove, this.onStart, this.onEnd)
+            .hover(function() { 
+                this.attr({cursor: "move"}); 
+            });
     };
 
 	maze.View.prototype.setSquare = function(paperNum, cellLocation, color) {
@@ -100,13 +104,20 @@
             }
         }
 
+        for(i = 0; i < this.paper.length; i++) {
+            //don't draw walls when the mouse is hovering over another element
+            if(this.paper[i].getElementByPoint(e.pageX, e.pageY)) {
+                return;
+            }
+        }
+
         var mouseX = e.layerX/(this.paper[0].width/this.model.getGridWidth()),
             mouseY = e.layerY/(this.paper[0].height/this.model.getGridHeight()),
             direction = this.getWallDirection(mouseX, mouseY),
             selectedCell = this.model.grid[[Math.floor(mouseX), Math.floor(mouseY)]],
             color = "gray";
 
-        if(direction) {
+        if(selectedCell && direction) {
             if(selectedCell.walls[direction]) {
                 color = "white";
             }
@@ -117,6 +128,13 @@
     };
 
     maze.View.prototype.onMouseDown = function(e) {
+        //don't draw walls when the mouse is hovering over another element
+        for(i = 0; i < this.paper.length; i++) {
+            if(this.paper[i].getElementByPoint(e.pageX, e.pageY)) {
+                return;
+            }
+        }
+
         var mouseX = e.layerX/(this.paper[0].width/this.model.getGridWidth()),
             mouseY = e.layerY/(this.paper[0].height/this.model.getGridHeight()),
             direction = this.getWallDirection(mouseX, mouseY),
