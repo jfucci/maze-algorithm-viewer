@@ -119,6 +119,11 @@
 		neighbor.walls[_.multiply(direction, -1)] = !neighbor.walls[_.multiply(direction, -1)];
 	};
 
+    //used in view.onMouseDown for checking
+    maze.Model.prototype.getNeighborInDirection = function(cell, direction) {
+	    return this.grid[_.add(cell.getLocation(), direction)] || undefined;
+    };
+
 	maze.Model.prototype.traceShortestPath = function(canvasNum, currentNode) {
 		this.shortestPath[canvasNum] = {};
 		while(!_.arrayEquals(this.start, currentNode)) {

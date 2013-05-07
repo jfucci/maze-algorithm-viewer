@@ -21,14 +21,6 @@ body, html {
 	float: left;
 }
 
-#paper0{
-	border:1px solid gray;
-}
-
-#paper1{
-	border:1px solid gray;
-}
-
 #description0{
     text-align: justify;
 }
