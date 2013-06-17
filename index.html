@@ -4,17 +4,18 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
         <title>Maze Algorithm Viewer</title>
         
         <link rel="stylesheet" href="maze.css" type="text/css" />
         
         <script src="lib/raphael-min.js" type="text/javascript"></script>
         <script src="lib/jquery-1.9.1.min.js" type="text/javascript"></script>
-        <script src="lib/jquery-ui-1.10.2/jquery-ui.min.js" type="text/javascript"></script>
+        <script src="lib/jquery-ui-1.10.3.custom.min.js" type="text/javascript"></script>
+		<script src="lib/jquery.ui.touch-punch.min.js"></script>
         <script src="lib/underscore-min.js" type="text/javascript"></script>
         <script src="lib/seedrandom-min.js" type="text/javascript"></script>
         <script src="lib/bootstrap.min.js" type="text/javascript"></script>
-		<script src="lib/jquery-ui-1.10.2/jquery.ui.touch-punch.min.js"></script>
 		
         <script type="text/javascript">
             var maze = {};
@@ -26,47 +27,29 @@
         <script type="text/javascript" src="src/Controller.js"></script>
     </head>
     <body>
+        <div id="title">PATH FINDER</div>
+        <div id="author">by Jacob Fucci</div>
+        <div id="description">
+            <p id="one">Below is a visualization of two route finding algorithms: A* and Dijkstra's. Dijkstra's Algorithm naively searches every possible path emanating outward from the start until it reaches the end. A* is similar, except that it uses a heuristic to intelligently determine which way to head. Click generate and drag the step slider below to watch this behavior.</p>
+            <p id="two">You can also create and destroy walls or move the start/end by clicking around the grid. You'll notice that A* usually reaches the end in far fewer steps than Dijkstra's Algorithm. Can you construct a degenerate grid for which Dijkstra's does better? How would you improve the algorithm to overcome this limitation?</p>
+        </div>
+        <div id="controls">
+			<a class="btn" id="generate">GENERATE</a>
+            <a id="step">STEP</a>
+            <a class="btn" id="left">&lt;</a>
+            <a class="btn" id="right">&gt;</a>
+            <div id="stepselect" class="unselectable"></div>
+            <a class="btn" id="clear">CLEAR</a>
+        </div>
 		<div id=paperdiv0>
+            <select id=algorithms0></select>
+            <div id="step0">Step Number: <span id="stepdisplay0">0</span></div>
 			<div id="paper0"></div>
-			<h5>Step Number: <span id="stepdisplay0">0</span></h5>
-			<select id=algorithms0></select>
-            <div id=description0></div>
 		</div>
 		<div id=paperdiv1>
-			<div id="paper1"></div>
-			<h5>Step Number: <span id="stepdisplay1">0</span></h5>
 			<select id=algorithms1></select>
-            <div id=description1></div>
-		</div>
-		<div id="controls">
-			<h3>Maze Algorithm Viewer</h3>
-			<a class ="btn" id="generate">Generate New Maze</a>
-			<br/><br/>
-			<a class ="btn" id="clear">Clear Grid</a>
-			<br/><br/>
-			<h5>Step Slider <div id="stepselect"></div></h5>
-			<br/>
-			<a class="btn" id="helpbutton">Show Help</a>
-		</div>
-		<div id="helpdialog" title="Help">
-			Usage:
-			<ul>
-				<li>The "Generate Maze" button generates a new maze using a depth-first search.</li>
-				<li>Modify walls or create your own maze by clicking two cell corners in the same column or row.</li>
-				<li>Use the step slider to view the algorithm's progress at a specific point in time.</li>
-				<li>The step number is the total number of steps the algorithm has gone through. It will not count past the solving of the maze.</li>
-				<li>Use the drop-down menu to change the algorithm used to solve the maze. The maze will update the cells, staying at the time specified by the step slider.</li>
-				<li>The start and end cells are able to be moved via click-and-drag</li>
-			</ul>
-
-			Cell Colors:
-			<table>
-				<tr><td>Green</td>	<td>- The start</td></tr>
-				<tr><td>Red</td>	<td>- The end</td></tr>
-  				<tr><td>Orange</td>	<td>- The cell the algorithm is currently working on</td></tr>
-  				<tr><td>Yellow</td>	<td>- The working shortest path</td></tr>
-  				<tr><td>Blue</td>	<td>- The cells the algorithm has visited</td></tr>
-			</table>
+			<div id="step1">Step Number: <span id="stepdisplay1">0</span></div>
+			<div id="paper1"></div>
 		</div>
     </body>  
 </html>

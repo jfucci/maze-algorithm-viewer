@@ -42,24 +42,34 @@
 			}
 		});
 
-		$("#helpdialog").dialog({
-			dialogClass: "no-close",
-			autoOpen: false,
-			draggable: false,
-			position: {
-				my: "right center",
-				at: "left center",
-				of: helpbutton
-			},
-			width: 550
-		});
+		$("#left").click(_.bind(function() {
+		    var step = $("#stepselect").slider("option", "value");
+			$("#stepselect").slider("value", step-1);
+        }, this))
+
+		$("#right").click(_.bind(function() {
+		    var step = $("#stepselect").slider("option", "value");
+			$("#stepselect").slider("value", step+1);
+        }, this))
+
+//		$("#helpdialog").dialog({
+//			dialogClass: "no-close",
+//			autoOpen: false,
+//			draggable: false,
+//			position: {
+//				my: "right center",
+//				at: "left center",
+//				of: helpbutton
+//			},
+//			width: 550
+//		});
 
 		//click events
 
 		$("#algorithms0").change(_.bind(function() {
             var index = $("#algorithms0 :selected").index();
 			this.selectedAlgorithm0 = algorithms[index];
-            $("#description0").text(descriptions[index]);
+            //$("#description0").text(descriptions[index]);
 			this.update();
 		}, this));
 
@@ -67,7 +77,7 @@
 		$("#algorithms1").change(_.bind(function() {
             var index = $("#algorithms1 :selected").index();
 			this.selectedAlgorithm1 = algorithms[index];
-            $("#description1").text(descriptions[index]);
+            //$("#description1").text(descriptions[index]);
 			this.update();
 		}, this));
 
@@ -85,23 +95,23 @@
 			this.update();
 		}, this));
 
-		$("#helpbutton").click(_.bind(function() {
-			if($("#helpdialog").dialog("isOpen")) {
-				$("#helpdialog").dialog("close");
-				$("#helpbutton").text("Show Help");
-			} else {
-				$("#helpdialog").dialog("open");
-				$("#helpbutton").text("Hide Help");
-			}
-		}));
+//		$("#helpbutton").click(_.bind(function() {
+//			if($("#helpdialog").dialog("isOpen")) {
+//				$("#helpdialog").dialog("close");
+//				$("#helpbutton").text("Show Help");
+//			} else {
+//				$("#helpdialog").dialog("open");
+//				$("#helpbutton").text("Hide Help");
+//			}
+//		}));
 
 		//set up the algorithm select by appending to the html
 		this.setupMenu(algorithms, 0);
 		this.setupMenu(algorithms, 1);
 
         //set the widths of the descriptions to the width of a canvas
-        $("#description0").width($("#paper0").width());
-        $("#description1").width($("#paper1").width());
+//        $("#description0").width($("#paper0").width());
+//        $("#description1").width($("#paper1").width());
 
         //show the descriptions for the default algorithms
 		$("#algorithms0").change();
@@ -157,8 +167,9 @@
             var x = Math.floor(e.layerX/(this.view.paper[0].width/this.model.getGridWidth()));
             var y = Math.floor(e.layerY/(this.view.paper[0].height/this.model.getGridHeight()));
             this.model[cell] = [x, y];
-            this.view[cell][paperNum]["attr"](this.view.getCellDimensions(0, [x, y]));
-            this.view[cell][otherNum]["attr"](this.view.getCellDimensions(0, [x, y]));
+            var dimensions = this.view.getCellDimensions(0, [x, y]);
+            this.view[cell][paperNum]["attr"]({x: dimensions.x + dimensions.w/2, y: dimensions.y + dimensions.h/2});
+            this.view[cell][otherNum]["attr"]({x: dimensions.x + dimensions.w/2, y: dimensions.y + dimensions.h/2});
             this.update();
         }, this);
     };

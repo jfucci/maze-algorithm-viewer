@@ -32,7 +32,7 @@
         }, this);
 
         for(var i = 0; i < this.grid.length; i++) {
-            this.paper[i].rect(0, 0, this.paper[i].width, this.paper[i].height).attr({fill: "none", stroke: "gray"});
+            this.paper[i].rect(0, 0, this.paper[i].width, this.paper[i].height).attr({fill: "none", stroke: "none"});
             _.each(this.model.grid, function(cell) {
                 cell = cell.getLocation();
                 this.grid[i][cell] = this.setSquare(i, cell, "none");
@@ -46,13 +46,15 @@
 
     maze.View.prototype.setupDraggableCells = function() {
         for(var i = 0; i < this.paper.length; i++) {
-            this.start[i] = this.setDraggableSq(i, this.model.start, "green");
-            this.end[i] = this.setDraggableSq(i, this.model.end, "red");
+            this.start[i] = this.setStartEnd(i, this.model.start, "green", "start");
+            this.end[i] = this.setStartEnd(i, this.model.end, "red", "end");
         }
     };
 
-    maze.View.prototype.setDraggableSq = function(paperNum, cellLocation, color) {
-        return this.setSquare(paperNum, cellLocation, color)
+    maze.View.prototype.setStartEnd = function(paperNum, cellLocation, color, text) {
+        var dimensions = this.getCellDimensions(paperNum, cellLocation);
+        return this.paper[paperNum].text(dimensions.x + dimensions.w/2, dimensions.y + dimensions.h/2, text)
+            .attr({fill: color, stroke: "none", "font-size": 16, "font-family": "Open Sans, Helvetica, sans-serif"})
             .drag(this.onMove, this.onStart, this.onEnd)
             .hover(function() { 
                 this.attr({cursor: "move"}); 
@@ -79,7 +81,7 @@
         this.toFront();
         this.ox = this.attr("x");
         this.oy = this.attr("y");
-        this.attr({opacity: 0.7});
+        this.animate({"opacity": 0.5}, 500);
 	};
 
     maze.View.prototype.onMove = function(dx, dy) {
@@ -93,7 +95,7 @@
     };
 
     maze.View.prototype.onEnd = function(dx, dy) {
-        this.attr({ opacity: 1 });
+        this.animate({"opacity": 1}, 500);
     };
 
     maze.View.prototype.onMouseMove = function(e) {
@@ -115,14 +117,14 @@
             mouseY = e.layerY/(this.paper[0].height/this.model.getGridHeight()),
             direction = this.getWallDirection(mouseX, mouseY),
             selectedCell = this.model.grid[[Math.floor(mouseX), Math.floor(mouseY)]],
-            color = "gray";
+            color = "lightgray";
 
         if(selectedCell && direction) {
             if(selectedCell.walls[direction]) {
-                color = "white";
+                color = "#EEEEEE";
             }
             for(i = 0; i < this.paper.length; i++) {
-                this.selectedWall[i] = this.setWall(i, selectedCell, direction, color, false);
+                this.selectedWall[i] = this.setWall(i, selectedCell, direction, color, false).toFront();
             }
         }
     };
@@ -185,13 +187,18 @@
                 }
 
                 _.each(directions, function(d) {
-                    var r = 2.5*this.hPixel*this.paper[i].width,
+                    var w = 10*this.hPixel*this.paper[i].width,
                         x = scale[0]*cellX + d[0]*scale[0],
                         y = scale[1]*cellY + d[1]*scale[1];
-                    this.paper[i].circle(x, y, r).attr({fill: "gray", stroke: "none" });
+                    this.drawCross(x, y, w, i);
                 }, this);
             }, this);
         }
+    };
+
+    maze.View.prototype.drawCross = function(x, y, w, paperNum) {
+        this.paper[paperNum].path("M" + (x-w/2) + "," + y + "L" + (x+w/2) + "," +  y +
+                                  "M" + x + "," + (y-w/2) + "L" + x + "," +  (y+w/2)).attr({stroke: "gray", "stroke-width": 0.5 });
     };
 
     maze.View.prototype.drawMaze = function() {
@@ -200,7 +207,7 @@
             _.each(this.model.grid, function(cell) {
                 _.each(maze.getDirections(), function(direction) {
                     if(cell.walls[direction]) {
-                        this.setWall(i, cell, direction, "black", true);
+                        this.setWall(i, cell, direction, "lightgray", true);
                     }
                 }, this);
             }, this);
@@ -211,7 +218,7 @@
         var coords  = this.getPathCoordinates(paperNum, cell, direction),
             start   = coords[0],
             end     = coords[1],
-            wall = this.paper[paperNum].path("M" + start[0] + "," + start[1] + "L" + end[0] + "," + end[1]).attr({stroke: color});
+            wall = this.paper[paperNum].path("M" + start[0] + "," + start[1] + "L" + end[0] + "," + end[1]).attr({stroke: color, "stroke-width": 2*this.hPixel*this.paper[paperNum].width}).toBack();
         if(permanentWall) {
             this.maze[paperNum].push(wall.toBack());
         } else {
@@ -262,6 +269,9 @@
             if(pathData.currentNode) {
                 this.grid[i][pathData.currentNode].attr({fill: "orange"});
             }
+
+            this.grid[i][this.model.start].attr({fill: "none"});
+            this.grid[i][this.model.end].attr({fill: "none"});
         }
 	};
 }());
