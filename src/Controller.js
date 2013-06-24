@@ -64,6 +64,9 @@
 //			width: 550
 //		});
 
+        $("#algorithms0").select2({ minimumResultsForSearch: -1 });
+        $("#algorithms1").select2({ minimumResultsForSearch: -1 });
+
 		//click events
 
 		$("#algorithms0").change(_.bind(function() {

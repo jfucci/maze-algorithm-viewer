@@ -29,6 +29,7 @@
             paper.safari();
             paper.renderfix();
             paper.canvas.onmousemove = _.bind(this.onMouseMove, this);
+            paper.canvas.onmouseout = _.bind(this.onMouseOut, this);
         }, this);
 
         for(var i = 0; i < this.grid.length; i++) {
@@ -96,6 +97,12 @@
 
     maze.View.prototype.onEnd = function(dx, dy) {
         this.animate({"opacity": 1}, 500);
+    };
+
+    maze.View.prototype.onMouseOut = function(e) {
+        for(var i = 0; i < this.paper.length; i++) {
+            this.selectedWall[i].remove();
+        }
     };
 
     maze.View.prototype.onMouseMove = function(e) {

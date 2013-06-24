@@ -1,8 +1,11 @@
 @import url("lib/jquery-ui-1.10.3.custom.min.css");
+@import url("lib/select2.css");
 
 * { margin: 0; padding: 0; border: none }
 
 body, html { font-family: "Open Sans", Helvetica, Arial, sans-serif; font-size: 13px }
+
+#wrapper { width:1000px; margin: 0 auto }
 
 #title, #author { text-align: center; color: #511a1a }
 
@@ -19,9 +22,9 @@ body, html { font-family: "Open Sans", Helvetica, Arial, sans-serif; font-size: 
 
 #one, #two { width: 40%;  line-height: 2 }
 
-#one { display: inline-block; margin-left: 7% }
+#one { display: inline-block }
 
-#two { float: right; margin-right: 7% }
+#two { float: right }
 
 .btn, #step {
     margin-top: 30px;
@@ -33,7 +36,7 @@ body, html { font-family: "Open Sans", Helvetica, Arial, sans-serif; font-size: 
     color: #fff;
 }
 
-#generate { margin-left: 7%; background: #227f20 }
+#generate { background: #227f20 }
 
 #step, #left, #right { background: #207f73; margin-left: -1px; margin-right: -1px; }
 
@@ -57,7 +60,7 @@ body, html { font-family: "Open Sans", Helvetica, Arial, sans-serif; font-size: 
     background-size: 4px 12px;
 }
 
-.ui-slider .ui-slider-handle { top: -8px; width: 13px; background: #207f73; border: none }
+.ui-slider .ui-slider-handle { outline: 0; top: -8px; width: 13px; background: #207f73; border: none }
 
 .btn, #stepselect, .ui-slider .ui-slider-handle { cursor: pointer }
 
@@ -73,7 +76,23 @@ body, html { font-family: "Open Sans", Helvetica, Arial, sans-serif; font-size: 
 
 #step0, #step1, #algorithms0, #algorithms1 { display: inline }
 
-#algorithms0, #algorithms1 { color: #fff; background: #62605c } 
+.select2-container { margin-bottom: 5px; margin-right: 5px }
+
+.select2-container .select2-choice { outline: 0; }
+
+.select2-results .select2-highlighted { background: #272625; }
+
+.select2-container .select2-choice { font-weight: bold }
+
+.select2-container, .select2-container .select2-choice, .select2-container .select2-choice div, .select2-drop { 
+    border: none; border-radius: 0; color: #fff; background: #62605c 
+} 
+
+.select2-dropdown-open .select2-choice {
+    -webkit-box-shadow: none; 
+       -moz-box-shadow: none;
+            box-shadow: none;
+}
 
 #paper0, #paper1 { position: relative; margin-top: -1px } 
 
