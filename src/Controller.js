@@ -42,15 +42,15 @@
 			}
 		});
 
-		$("#left").click(_.bind(function() {
+        this.clickAndHold($("#left"), 500, 1.5, function() {
 		    var step = $("#stepselect").slider("option", "value");
 			$("#stepselect").slider("value", step-1);
-        }, this))
+        })
 
-		$("#right").click(_.bind(function() {
+        this.clickAndHold($("#right"), 500, 1.5, function() {
 		    var step = $("#stepselect").slider("option", "value");
 			$("#stepselect").slider("value", step+1);
-        }, this))
+        })
 
 //		$("#helpdialog").dialog({
 //			dialogClass: "no-close",
@@ -180,6 +180,32 @@
     maze.Controller.prototype.onMouseDown = function(e) {
         this.view.onMouseDown(e);
         this.update();
+    };
+
+    maze.Controller.prototype.clickAndHold = function(button, step, speedup, action) {
+        var t, 
+            origStep = step,
+            repeat = function() {
+                action();
+                t = setTimeout(repeat, step);
+                if(step > 50) {
+                    step /= speedup;
+                }
+            };
+        
+        button.mousedown(_.bind(function() {
+            repeat();
+        }, this));
+
+        button.mouseleave(function() {
+            clearTimeout(t);
+            step = origStep;
+        });
+
+        button.mouseup(function() {
+            clearTimeout(t);
+            step = origStep;
+        });
     };
 
 }());
