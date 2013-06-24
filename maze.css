@@ -20,7 +20,7 @@ body, html { font-family: "Open Sans", Helvetica, Arial, sans-serif; font-size: 
 
 #author { margin: 30px; font-size: 12px }
 
-#one, #two { width: 40%;  line-height: 2 }
+#one, #two { text-align: justify; width: 45%;  line-height: 2 }
 
 #one { display: inline-block }
 
@@ -44,7 +44,7 @@ body, html { font-family: "Open Sans", Helvetica, Arial, sans-serif; font-size: 
 
 #step, #clear { margin-left: 20px }
 
-#clear { background: #7f2020 }
+#clear { float: right; background: #7f2020 }
 
 #stepselect {
     display: inline-block;
@@ -52,7 +52,7 @@ body, html { font-family: "Open Sans", Helvetica, Arial, sans-serif; font-size: 
     top: 1px;
     margin-left: 8px;
     height: 12px;
-    width: 60%;
+    width: 63%;
     border: none;
     background-color:#ededed;
     background-image: linear-gradient(90deg, #d5d5d5 1px, transparent 1px), 
@@ -96,11 +96,11 @@ body, html { font-family: "Open Sans", Helvetica, Arial, sans-serif; font-size: 
 
 #paper0, #paper1 { position: relative; margin-top: -1px } 
 
-#paperdiv0, #paperdiv1 { position: absolute; margin-top: 25px } 
+#paperdiv0, #paperdiv1 { position: relative; margin-top: 25px } 
 
-#paperdiv0 { left: 10% }
+#paperdiv0 { float: left }
 
-#paperdiv1 { right: 10% }
+#paperdiv1 { float: right; }
 
 #paper0, #paper1 { background: #f9f9f9; margin-bottom: 20px }
 
